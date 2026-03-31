@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f0f0f">
+<title>Wysyłka — Magazyn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: #2e2e2e;
+    --accent: #ff6b00;
+    --accent-dim: rgba(255,107,0,0.15);
+    --accent-glow: rgba(255,107,0,0.4);
+    --text: #f0f0f0;
+    --text-dim: #888;
+    --success: #2ecc71;
+    --error: #e74c3c;
+    --radius: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: var(--accent);
+  }
+  .date-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    background: var(--surface2);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+  .settings-btn {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 20px;
+    padding: 4px;
+    line-height: 1;
+  }
+
+  /* ── MAIN CONTENT ── */
+  main {
+    flex: 1;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ── COUNTER ── */
+  .counter-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+  }
+  .counter-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .counter-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .counter-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .counter-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .card-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+  }
+
+  /* ── INPUTS ── */
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .field input {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 16px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  .field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+  .field input::placeholder {
+    color: #444;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+  }
+
+  /* ── CAMERA ZONE ── */
+  .camera-zone {
+    position: relative;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface2);
+    transition: border-color 0.2s;
+  }
+  .camera-zone.has-photo { border-style: solid; border-color: var(--accent); }
+
+  #photo-preview {
+    width: 100%;
+    display: block;
+    max-height: 260px;
+    object-fit: cover;
+    display: none;
+  }
+  #photo-preview.visible { display: block; }
+
+  .camera-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+    gap: 10px;
+    cursor: pointer;
+  }
+  .camera-placeholder.hidden { display: none; }
+
+  .cam-icon {
+    width: 52px;
+    height: 52px;
+    background: var(--accent-dim);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    transition: transform 0.15s;
+  }
+  .camera-placeholder:active .cam-icon { transform: scale(0.92); }
+
+  .cam-label { font-size: 15px; font-weight: 600; color: var(--text); }
+  .cam-sub { font-size: 12px; color: var(--text-dim); }
+
+  #camera-input { display: none; }
+
+  .photo-actions {
+    display: none;
+    gap: 8px;
+    padding: 10px;
+    background: rgba(0,0,0,0.6);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+  .photo-actions.visible { display: flex; }
+
+  .btn-retake {
+    flex: 1;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-retake:active { background: rgba(255,255,255,0.2); }
+
+  /* ── SUBMIT BUTTON ── */
+  .btn-submit {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius);
+    color: #fff;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-submit:not(:disabled):active {
+    transform: scale(0.97);
+    background: #e05a00;
+  }
+  .btn-submit:disabled {
+    background: var(--surface2);
+    color: var(--text-dim);
+    cursor: not-allowed;
+  }
+  .btn-submit.loading {
+    background: #333;
+    color: var(--text-dim);
+  }
+
+  /* ── STATUS TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 16px;
+    right: 16px;
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 999;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+  }
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .toast.success { background: var(--success); color: #fff; }
+  .toast.error { background: var(--error); color: #fff; }
+
+  /* ── HISTORY ── */
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .history-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--border);
+  }
+  .history-info { flex: 1; min-width: 0; }
+  .history-wz {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .history-company {
+    font-size: 11px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .history-status {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .history-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  /* ── SETTINGS MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 200;
+    align-items: flex-end;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px 40px;
+    width: 100%;
+    border-top: 1px solid var(--border);
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.34, 1.1, 0.64, 1);
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 1.5px;
+    margin-bottom: 20px;
+    color: var(--accent);
+  }
+  .modal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .modal-field label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+  }
+  .modal-field input {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    padding: 12px 14px;
+    outline: none;
+  }
+  .modal-field input:focus { border-color: var(--accent); }
+  .btn-save {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    padding: 14px;
+    margin-top: 8px;
+    cursor: pointer;
+  }
+  .empty-history {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 13px;
+    padding: 20px 0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">WYSYŁKA</div>
+  <div class="date-badge" id="header-date">—</div>
+  <button class="settings-btn" onclick="openSettings()" title="Ustawienia">⚙</button>
+</header>
+
+<main>
+
+  <!-- COUNTER -->
+  <div class="counter-bar">
+    <div class="counter-num" id="today-count">0</div>
+    <div class="counter-info">
+      <div class="counter-label">Wysyłki dziś</div>
+      <div class="counter-date" id="counter-date">—</div>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <div class="card">
+    <div class="card-title">Nowa wysyłka</div>
+    <div class="field">
+      <label>Numer WZ / Faktury</label>
+      <input type="text" id="wz-number" placeholder="np. WZ/2025/001" autocomplete="off" autocapitalize="characters">
+    </div>
+    <div class="field">
+      <label>Nazwa firmy (klient)</label>
+      <input type="text" id="company-name" placeholder="Nazwa klienta" autocomplete="off">
+    </div>
+  </div>
+
+  <!-- CAMERA -->
+  <div class="card" style="padding:0; overflow:hidden">
+    <div class="camera-zone" id="camera-zone">
+      <div class="camera-placeholder" id="camera-placeholder" onclick="triggerCamera()">
+        <div class="cam-icon">📷</div>
+        <div class="cam-label">Zrób zdjęcie</div>
+        <div class="cam-sub">Dotknij aby otworzyć aparat</div>
+      </div>
+      <img id="photo-preview" alt="Podgląd zdjęcia">
+      <div class="photo-actions" id="photo-actions">
+        <button class="btn-retake" onclick="retakePhoto()">↺ Nowe zdjęcie</button>
+      </div>
+    </div>
+    <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="handlePhotoCapture(event)">
+  </div>
+
+  <!-- SUBMIT -->
+  <button class="btn-submit" id="submit-btn" onclick="submitEntry()" disabled>
+    WYŚLIJ I ZAPISZ
+  </button>
+
+  <!-- HISTORY -->
+  <div class="card">
+    <div class="card-title">Dzisiaj wysłane</div>
+    <div class="history-list" id="history-list">
+      <div class="empty-history">Brak wysyłek dzisiaj</div>
+    </div>
+  </div>
+
+</main>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settings-modal" onclick="closeSettingsOnBg(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⚙ Ustawienia</div>
+    <div class="modal-field">
+      <label>Webhook URL (n8n)</label>
+      <input type="url" id="webhook-url" placeholder="https://twoj-n8n.pl/webhook/magazyn">
+    </div>
+    <div class="modal-field">
+      <label>Nazwa magazynu / pracownika</label>
+      <input type="text" id="worker-name" placeholder="np. Magazyn Poznań / Jan K.">
+    </div>
+    <button class="btn-save" onclick="saveSettings()">Zapisz</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let photoDataUrl = null;
+let photoBlob = null;
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+function init() {
+  updateDateDisplay();
+  loadTodayCount();
+  renderHistory();
+  setupInputListeners();
+  setInterval(updateDateDisplay, 60000);
+}
+
+function updateDateDisplay() {
+  const now = new Date();
+  const opts = { weekday: 'long', day: 'numeric', month: 'long' };
+  const str = now.toLocaleDateString('pl-PL', opts);
+  document.getElementById('header-date').textContent = now.toLocaleDateString('pl-PL');
+  document.getElementById('counter-date').textContent = str;
+}
+
+function getTodayKey() {
+  return 'entries_' + new Date().toISOString().split('T')[0];
+}
+
+function loadTodayCount() {
+  const entries = getTodayEntries();
+  document.getElementById('today-count').textContent = entries.length;
+}
+
+function getTodayEntries() {
+  try {
+    return JSON.parse(localStorage.getItem(getTodayKey()) || '[]');
+  } catch { return []; }
+}
+
+function saveTodayEntry(entry) {
+  const entries = getTodayEntries();
+  entries.push(entry);
+  localStorage.setItem(getTodayKey(), JSON.stringify(entries));
+  document.getElementById('today-count').textContent = entries.length;
+}
+
+// ══════════════════════════════════════════
+//  FORM VALIDATION
+// ══════════════════════════════════════════
+function setupInputListeners() {
+  document.getElementById('wz-number').addEventListener('input', checkCanSubmit);
+  document.getElementById('company-name').addEventListener('input', checkCanSubmit);
+}
+
+function checkCanSubmit() {
+  const wz = document.getElementById('wz-number').value.trim();
+  const company = document.getElementById('company-name').value.trim();
+  const hasPhoto = photoDataUrl !== null;
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = !(wz && company && hasPhoto);
+}
+
+// ══════════════════════════════════════════
+//  CAMERA
+// ══════════════════════════════════════════
+function triggerCamera() {
+  document.getElementById('camera-input').click();
+}
+
+function handlePhotoCapture(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Resize image to save bandwidth
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const maxDim = 1400;
+      let w = img.width, h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+        else { w = Math.round(w * maxDim / h); h = maxDim; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      photoDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+
+      // Show preview
+      const preview = document.getElementById('photo-preview');
+      preview.src = photoDataUrl;
+      preview.classList.add('visible');
+      document.getElementById('camera-placeholder').classList.add('hidden');
+      document.getElementById('photo-actions').classList.add('visible');
+      document.getElementById('camera-zone').classList.add('has-photo');
+      checkCanSubmit();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function retakePhoto() {
+  photoDataUrl = null;
+  document.getElementById('photo-preview').classList.remove('visible');
+  document.getElementById('camera-placeholder').classList.remove('hidden');
+  document.getElementById('photo-actions').classList.remove('visible');
+  document.getElementById('camera-zone').classList.remove('has-photo');
+  document.getElementById('camera-input').value = '';
+  checkCanSubmit();
+}
+
+// ══════════════════════════════════════════
+//  SUBMIT
+// ══════════════════════════════════════════
+async function submitEntry() {
+  const wz = document.getElementById('wz-number').value.trim();
+  const company = document.getElementById('company-name').value.trim();
+  const webhookUrl = localStorage.getItem('webhook_url') || '';
+  const workerName = localStorage.getItem('worker_name') || 'Magazyn';
+
+  if (!wz || !company || !photoDataUrl) return;
+
+  const btn = document.getElementById('submit-btn');
+  btn.classList.add('loading');
+  btn.textContent = 'WYSYŁANIE...';
+  btn.disabled = true;
+
+  const timestamp = new Date().toISOString();
+  const payload = {
+    wz_number: wz,
+    company_name: company,
+    worker: workerName,
+    timestamp: timestamp,
+    date: timestamp.split('T')[0],
+    time: new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' }),
+    image_base64: photoDataUrl
+  };
+
+  let success = false;
+  let errorMsg = '';
+
+  if (!webhookUrl) {
+    // Demo mode — just save locally
+    errorMsg = 'Brak URL webhooka — zapisano lokalnie';
+    success = false;
+    showToast('⚠ Skonfiguruj webhook URL w ustawieniach', 'error');
+  } else {
+    try {
+      const res = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      success = res.ok;
+      if (!res.ok) errorMsg = `Błąd serwera: ${res.status}`;
+    } catch (e) {
+      errorMsg = 'Błąd połączenia: ' + e.message;
+    }
+  }
+
+  if (success) {
+    // Save locally too
+    saveTodayEntry({ wz, company, time: payload.time, thumb: photoDataUrl, status: 'ok' });
+    renderHistory();
+    showToast('✓ Wysłano i zapisano pomyślnie!', 'success');
+    resetForm();
+  } else {
+    // Save locally as pending
+    saveTodayEntry({ wz, company, time: payload.time, thumb: photoDataUrl, status: 'pending', error: errorMsg });
+    renderHistory();
+    showToast('⚠ ' + (errorMsg || 'Błąd wysyłki — zapisano lokalnie'), 'error');
+    loadTodayCount();
+  }
+
+  btn.classList.remove('loading');
+  btn.textContent = 'WYŚLIJ I ZAPISZ';
+  btn.disabled = false;
+  checkCanSubmit();
+}
+
+function resetForm() {
+  document.getElementById('wz-number').value = '';
+  document.getElementById('company-name').value = '';
+  retakePhoto();
+}
+
+// ══════════════════════════════════════════
+//  HISTORY
+// ══════════════════════════════════════════
+function renderHistory() {
+  const entries = getTodayEntries().slice().reverse();
+  const list = document.getElementById('history-list');
+  if (entries.length === 0) {
+    list.innerHTML = '<div class="empty-history">Brak wysyłek dzisiaj</div>';
+    return;
+  }
+  list.innerHTML = entries.map(e => `
+    <div class="history-item">
+      <img class="history-thumb" src="${e.thumb}" alt="">
+      <div class="history-info">
+        <div class="history-wz">${escHtml(e.wz)}</div>
+        <div class="history-company">${escHtml(e.company)}</div>
+      </div>
+      <div class="history-time">${e.time}</div>
+      <div class="history-status">${e.status === 'ok' ? '✅' : '⏳'}</div>
+    </div>
+  `).join('');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ══════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════
+let toastTimer;
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ══════════════════════════════════════════
+//  SETTINGS
+// ══════════════════════════════════════════
+function openSettings() {
+  document.getElementById('webhook-url').value = localStorage.getItem('webhook_url') || '';
+  document.getElementById('worker-name').value = localStorage.getItem('worker_name') || '';
+  document.getElementById('settings-modal').classList.add('open');
+}
+
+function saveSettings() {
+  localStorage.setItem('webhook_url', document.getElementById('webhook-url').value.trim());
+  localStorage.setItem('worker_name', document.getElementById('worker-name').value.trim());
+  document.getElementById('settings-modal').classList.remove('open');
+  showToast('✓ Ustawienia zapisane', 'success');
+}
+
+function closeSettingsOnBg(e) {
+  if (e.target === e.currentTarget) document.getElementById('settings-modal').classList.remove('open');
+}
+
+// ══════════════════════════════════════════
+//  START
+// ══════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
